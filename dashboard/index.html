@@ -199,7 +199,7 @@
             <div class="logo">Staycado Dashboard</div>
             <div class="user-info">
                 <span id="userEmail" class="user-email"></span>
-                <a href="../index.html" class="btn btn-secondary">Back to Site</a>
+                <a href="https://staycado.com" class="btn btn-secondary">Back to Site</a>
                 <button id="signOutBtn" class="btn">Sign Out</button>
             </div>
         </header>
@@ -244,7 +244,7 @@
                     welcomeEmail.textContent = user.email;
                 } else {
                     // User is not signed in - redirect to home
-                    window.location.href = '../index.html';
+                    window.location.href = 'https://staycado.com';
                 }
             });
             
@@ -252,7 +252,7 @@
             signOutBtn.addEventListener('click', async () => {
                 try {
                     await window.signOut(window.auth);
-                    window.location.href = '../index.html';
+                    window.location.href = 'https://staycado.com';
                 } catch (error) {
                     console.error('Error signing out:', error);
                 }
