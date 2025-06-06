@@ -255,9 +255,8 @@
             window.onAuthStateChanged(window.auth, (user) => {
                 currentUser = user;
                 if (user) {
-                    // User is signed in
-                    authButton.textContent = 'Sign Out';
-                    console.log('User signed in:', user.email);
+                    // User is signed in - redirect to dashboard
+                    window.location.href = 'dashboard/index.html';
                 } else {
                     // User is signed out
                     authButton.textContent = 'Sign In';
