@@ -422,6 +422,29 @@
             pointer-events: none;
         }
         
+        /* Loading animations */
+        .avatar-uploading .avatar-preview {
+            animation: shimmer 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background: linear-gradient(135deg, #e8d5ff, #d1a7f0); }
+            50% { background: linear-gradient(135deg, #f0e6ff, #e8d5ff); }
+            100% { background: linear-gradient(135deg, #e8d5ff, #d1a7f0); }
+        }
+        
+        .uploading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+        
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
@@ -801,10 +824,11 @@
                 try {
                     console.log('Starting upload process...');
                     
-                    // Show uploading state
+                    // Show uploading state with animations
                     const avatarSection = document.querySelector('.avatar-section');
                     avatarSection.classList.add('avatar-uploading');
-                    avatarUploadBtn.textContent = 'Uploading...';
+                    avatarUploadBtn.textContent = 'Uploading';
+                    avatarUploadBtn.classList.add('uploading-dots');
                     
                     // Get user ID
                     const userId = currentUser?.uid || window.tokenUserInfo?.uid;
@@ -837,9 +861,10 @@
                     console.error('Error details:', error.message, error.code, error.stack);
                     showToast(`Error uploading profile picture: ${error.message}`, 'error');
                 } finally {
-                    // Remove uploading state
+                    // Remove uploading state and animations
                     const avatarSection = document.querySelector('.avatar-section');
                     avatarSection.classList.remove('avatar-uploading');
+                    avatarUploadBtn.classList.remove('uploading-dots');
                     avatarUploadBtn.textContent = 'Choose Photo';
                 }
             });
