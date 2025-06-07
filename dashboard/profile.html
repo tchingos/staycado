@@ -13,6 +13,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
         
         const firebaseConfig = {
             apiKey: "AIzaSyBGqtE8-zYcs4nnE_CScSUrxc85JBkMarY",
@@ -28,15 +29,20 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
         
-        // Make auth and db available globally
+        // Make Firebase services available globally
         window.auth = auth;
         window.db = db;
+        window.storage = storage;
         window.signOut = signOut;
         window.onAuthStateChanged = onAuthStateChanged;
         window.doc = doc;
         window.getDoc = getDoc;
         window.setDoc = setDoc;
+        window.ref = ref;
+        window.uploadBytes = uploadBytes;
+        window.getDownloadURL = getDownloadURL;
     </script>
     <style>
         * {
@@ -310,6 +316,103 @@
             margin: 4px 0;
         }
         
+        /* Avatar Upload Section */
+        .avatar-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+        
+        .avatar-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e8d5ff, #d1a7f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 8px 30px rgba(232, 213, 255, 0.3);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            overflow: hidden;
+            border: 4px solid white;
+        }
+        
+        .avatar-preview:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .avatar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .avatar-preview:hover .avatar-overlay {
+            opacity: 1;
+        }
+        
+        .avatar-overlay-text {
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .avatar-input {
+            display: none;
+        }
+        
+        .avatar-upload-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            font-size: 14px;
+            margin-top: 1rem;
+        }
+        
+        .avatar-upload-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .avatar-uploading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
         @media (max-width: 768px) {
             .header {
                 padding: 1rem;
@@ -368,6 +471,23 @@
                 
                 <div id="successMessage" class="success-message">
                     Profile updated successfully!
+                </div>
+                
+                <!-- Avatar Upload Section -->
+                <div class="avatar-section">
+                    <h3 style="margin-bottom: 1rem; color: #333;">Profile Picture</h3>
+                    <div class="avatar-container">
+                        <div class="avatar-preview" id="avatarPreview">
+                            <span id="avatarInitial">?</span>
+                            <div class="avatar-overlay">
+                                <div class="avatar-overlay-text">Click to<br>upload photo</div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="avatarInput" class="avatar-input" accept="image/*">
+                    <div>
+                        <button type="button" class="avatar-upload-btn" id="avatarUploadBtn">Choose Photo</button>
+                    </div>
                 </div>
                 
                 <form id="profileForm">
@@ -444,8 +564,11 @@
                 dropdownOpen = false;
             }
             
-            function updateNavigation(userEmail) {
-                if (userEmail) {
+            function updateNavigation(userEmail, avatarUrl = null) {
+                if (avatarUrl) {
+                    // Show avatar image in navigation circle
+                    navCircleIcon.innerHTML = `<img src="${avatarUrl}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`;
+                } else if (userEmail) {
                     navCircleIcon.textContent = userEmail.charAt(0).toUpperCase();
                 } else {
                     navCircleIcon.textContent = '👤';
@@ -540,6 +663,19 @@
                         document.getElementById('firstName').value = userData.firstName || '';
                         document.getElementById('lastName').value = userData.lastName || '';
                         document.getElementById('location').value = userData.location || '';
+                        
+                        // Load avatar if exists
+                        if (userData.avatarUrl) {
+                            updateAvatarDisplay(userData.avatarUrl);
+                            updateNavigation(userData.email || userDoc.email, userData.avatarUrl);
+                        } else {
+                            // Show initial from email
+                            const email = userData.email || window.tokenUserInfo?.email || currentUser?.email;
+                            if (email) {
+                                document.getElementById('avatarInitial').textContent = email.charAt(0).toUpperCase();
+                                updateNavigation(email);
+                            }
+                        }
                     }
                 } catch (error) {
                     console.error('Error loading profile:', error);
@@ -556,6 +692,99 @@
                     return false;
                 }
             }
+            
+            // Avatar upload functions
+            function updateAvatarDisplay(imageUrl) {
+                const avatarPreview = document.getElementById('avatarPreview');
+                const avatarInitial = document.getElementById('avatarInitial');
+                
+                avatarInitial.innerHTML = `<img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            }
+            
+            async function uploadAvatar(file, userId) {
+                try {
+                    // Create a reference to the avatar image
+                    const avatarRef = window.ref(window.storage, `avatars/${userId}/${file.name}`);
+                    
+                    // Upload the file
+                    const snapshot = await window.uploadBytes(avatarRef, file);
+                    
+                    // Get the download URL
+                    const downloadURL = await window.getDownloadURL(snapshot.ref);
+                    
+                    return downloadURL;
+                } catch (error) {
+                    console.error('Error uploading avatar:', error);
+                    throw error;
+                }
+            }
+            
+            // Avatar upload event handlers
+            const avatarInput = document.getElementById('avatarInput');
+            const avatarUploadBtn = document.getElementById('avatarUploadBtn');
+            const avatarPreview = document.getElementById('avatarPreview');
+            
+            // Button click opens file picker
+            avatarUploadBtn.addEventListener('click', () => {
+                avatarInput.click();
+            });
+            
+            // Avatar preview click opens file picker
+            avatarPreview.addEventListener('click', () => {
+                avatarInput.click();
+            });
+            
+            // Handle file selection
+            avatarInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showToast('Please select an image file', 'error');
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('Please select an image smaller than 5MB', 'error');
+                    return;
+                }
+                
+                try {
+                    // Show uploading state
+                    const avatarSection = document.querySelector('.avatar-section');
+                    avatarSection.classList.add('avatar-uploading');
+                    avatarUploadBtn.textContent = 'Uploading...';
+                    
+                    // Get user ID
+                    const userId = currentUser?.uid || window.tokenUserInfo?.uid;
+                    if (!userId) {
+                        throw new Error('No user ID available');
+                    }
+                    
+                    // Upload to Firebase Storage
+                    const avatarUrl = await uploadAvatar(file, userId);
+                    
+                    // Update avatar display
+                    updateAvatarDisplay(avatarUrl);
+                    updateNavigation(currentUser?.email || window.tokenUserInfo?.email, avatarUrl);
+                    
+                    // Save avatar URL to user profile
+                    await saveUserProfile(userId, { avatarUrl });
+                    
+                    showToast('Profile picture updated successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error uploading avatar:', error);
+                    showToast('Error uploading profile picture. Please try again.', 'error');
+                } finally {
+                    // Remove uploading state
+                    const avatarSection = document.querySelector('.avatar-section');
+                    avatarSection.classList.remove('avatar-uploading');
+                    avatarUploadBtn.textContent = 'Choose Photo';
+                }
+            });
             
             // Handle form submission
             profileForm.addEventListener('submit', async (e) => {
