@@ -6,34 +6,8 @@
     <title>Request Invite - Staycado</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase App (core) -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyBGqtE8-zYcs4nnE_CScSUrxc85JBkMarY",
-            authDomain: "staycado.firebaseapp.com",
-            projectId: "staycado",
-            storageBucket: "staycado.firebasestorage.app",
-            messagingSenderId: "369348767227",
-            appId: "1:369348767227:web:c39e0fe4e04a499af12f5e",
-            measurementId: "G-K6S1YJL8DD"
-        };
-        
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        
-        // Make auth available globally
-        window.auth = auth;
-        window.signInWithPopup = signInWithPopup;
-        window.GoogleAuthProvider = GoogleAuthProvider;
-        window.signOut = signOut;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.provider = provider;
-    </script>
+    <!-- Centralized Firebase Configuration -->
+    <script src="firebase-config.js"></script>
     <style>
         * {
             margin: 0;
@@ -259,8 +233,10 @@
     </script>
     
     <script>
-        // Wait for Firebase to load
-        window.addEventListener('load', function() {
+        // Wait for Firebase to load and initialize
+        window.addEventListener('load', async function() {
+            // Initialize Firebase using centralized config
+            await window.initializeFirebase();
             const authButton = document.getElementById('authButton');
             const signOutButton = document.getElementById('signOutButton');
             const authButtons = document.getElementById('authButtons');
@@ -292,7 +268,7 @@
                 } else {
                     // Sign in with Google
                     try {
-                        const result = await window.signInWithPopup(window.auth, window.provider);
+                        const result = await window.signInWithPopup(window.auth, window.googleProvider);
                         const user = result.user;
                         console.log('User signed in successfully:', user.email);
                         // Get token and redirect to dashboard
