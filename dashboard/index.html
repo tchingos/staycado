@@ -456,7 +456,7 @@
                 console.log('Dashboard: No token found, checking Firebase auth...');
                 let authCheckTimeout;
                 
-                window.onAuthStateChanged(window.auth, (user) => {
+                window.onAuthStateChanged(window.auth, async (user) => {
                     // Clear any pending redirect
                     if (authCheckTimeout) {
                         clearTimeout(authCheckTimeout);
