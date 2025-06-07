@@ -303,15 +303,32 @@
                 console.log('Token received - user authenticated');
                 loading.classList.add('hidden');
                 profilePage.classList.remove('hidden');
-                userEmail.textContent = 'Authenticated User';
+                
+                // Decode the Firebase token to get user info
+                try {
+                    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                    const userEmailFromToken = tokenPayload.email;
+                    const userIdFromToken = tokenPayload.user_id || tokenPayload.sub;
+                    
+                    userEmail.textContent = userEmailFromToken;
+                    
+                    // Store user info for saving profile
+                    window.tokenUserInfo = {
+                        email: userEmailFromToken,
+                        uid: userIdFromToken
+                    };
+                    
+                    // Load existing profile data
+                    await loadUserProfile(userIdFromToken);
+                } catch (error) {
+                    console.error('Error decoding token:', error);
+                    userEmail.textContent = 'Authenticated User';
+                }
                 
                 // Clean up URL if token was in URL
                 if (urlParams.get('token')) {
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
-                
-                // For now, we'll need to get user info another way since we only have the token
-                // In a real app, you'd verify the token and get user details
             } else {
                 // Check Firebase auth normally
                 window.onAuthStateChanged(window.auth, async (user) => {
@@ -373,27 +390,26 @@
                     firstName,
                     lastName,
                     location,
-                    email: currentUser?.email || 'authenticated@user.com',
+                    email: currentUser?.email || window.tokenUserInfo?.email || 'authenticated@user.com',
                     updatedAt: new Date().toISOString()
                 };
                 
-                if (currentUser) {
-                    const success = await saveUserProfile(currentUser.uid, profileData);
-                    if (success) {
-                        successMessage.style.display = 'block';
-                        setTimeout(() => {
-                            successMessage.style.display = 'none';
-                        }, 3000);
-                    } else {
-                        alert('Error saving profile. Please try again.');
-                    }
-                } else {
-                    // For token-based auth, we'd need to implement a different save method
-                    console.log('Profile data:', profileData);
+                // Use Firebase user ID or token user ID
+                const userId = currentUser?.uid || window.tokenUserInfo?.uid;
+                
+                if (!userId) {
+                    alert('Unable to save profile. Please try signing in again.');
+                    return;
+                }
+                
+                const success = await saveUserProfile(userId, profileData);
+                if (success) {
                     successMessage.style.display = 'block';
                     setTimeout(() => {
                         successMessage.style.display = 'none';
                     }, 3000);
+                } else {
+                    alert('Error saving profile. Please try again.');
                 }
             });
             
