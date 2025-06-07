@@ -620,7 +620,6 @@
             
             if (token) {
                 // We have a token from the main site
-                console.log('Token received - user authenticated');
                 
                 // Show page first, then try to decode token
                 loading.classList.add('hidden');
@@ -629,9 +628,7 @@
                 
                 // Try to decode the Firebase token to get user info
                 try {
-                    console.log('Attempting to decode token...');
                     const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                    console.log('Token payload:', tokenPayload);
                     
                     const userEmailFromToken = tokenPayload.email;
                     const userIdFromToken = tokenPayload.user_id || tokenPayload.sub;
@@ -645,11 +642,8 @@
                             uid: userIdFromToken
                         };
                         
-                        console.log('User info from token:', window.tokenUserInfo);
-                        
                         // Try to authenticate with Firebase using the token
                         try {
-                            console.log('Attempting to sign in with custom token...');
                             // Note: We'll need to use the token for Firebase Storage access
                             // For now, let's see if the auth state changes
                         } catch (authError) {
@@ -663,7 +657,6 @@
                     }
                 } catch (error) {
                     console.error('Error decoding token:', error);
-                    console.log('Using basic authentication fallback');
                 }
                 
                 // Clean up URL if token was in URL
@@ -738,36 +731,25 @@
             
             async function uploadAvatar(file, userId) {
                 try {
-                    console.log('Checking authentication state...');
-                    
                     // Check if user is properly authenticated (either via Firebase Auth or token)
                     const currentAuthUser = window.auth.currentUser;
                     const tokenUser = window.tokenUserInfo;
-                    console.log('Current auth user:', currentAuthUser);
-                    console.log('Token user info:', tokenUser);
                     
                     // Allow upload if user is authenticated via either method
                     if (!currentAuthUser && !tokenUser) {
                         throw new Error('User not authenticated');
                     }
                     
-                    console.log('Creating storage reference...');
-                    
                     // Create a reference to the avatar image with timestamp to avoid conflicts
                     const timestamp = Date.now();
                     const fileName = `avatar_${timestamp}_${file.name}`;
                     const avatarRef = window.ref(window.storage, `avatars/${userId}/${fileName}`);
-                    console.log('Storage reference created:', avatarRef.fullPath);
-                    
-                    console.log('Starting file upload...');
                     
                     // Upload the file
                     const snapshot = await window.uploadBytes(avatarRef, file);
-                    console.log('File uploaded successfully, getting download URL...');
                     
                     // Get the download URL
                     const downloadURL = await window.getDownloadURL(snapshot.ref);
-                    console.log('Download URL obtained:', downloadURL);
                     
                     return downloadURL;
                 } catch (error) {
@@ -798,8 +780,6 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
-                console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
-                
                 // Validate file type
                 if (!file.type.startsWith('image/')) {
                     console.error('Invalid file type:', file.type);
@@ -815,7 +795,6 @@
                 }
                 
                 try {
-                    console.log('Starting upload process...');
                     
                     // Show uploading state with animations
                     const avatarSection = document.querySelector('.avatar-section');
@@ -825,33 +804,25 @@
                     
                     // Get user ID
                     const userId = currentUser?.uid || window.tokenUserInfo?.uid;
-                    console.log('User ID:', userId);
                     
                     if (!userId) {
                         throw new Error('No user ID available');
                     }
                     
-                    console.log('Uploading to Firebase Storage...');
-                    
                     // Upload to Firebase Storage
                     const avatarUrl = await uploadAvatar(file, userId);
-                    console.log('Upload successful, URL:', avatarUrl);
                     
                     // Update avatar display
                     updateAvatarDisplay(avatarUrl);
                     updateNavigation(currentUser?.email || window.tokenUserInfo?.email, avatarUrl);
                     
-                    console.log('Saving avatar URL to profile...');
-                    
                     // Save avatar URL to user profile
                     await saveUserProfile(userId, { avatarUrl });
                     
-                    console.log('Profile updated successfully');
                     showToast('Profile picture updated successfully!', 'success');
                     
                 } catch (error) {
                     console.error('Error uploading avatar:', error);
-                    console.error('Error details:', error.message, error.code, error.stack);
                     showToast(`Error uploading profile picture: ${error.message}`, 'error');
                 } finally {
                     // Remove uploading state and animations

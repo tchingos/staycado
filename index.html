@@ -551,8 +551,6 @@
     </footer>
     
     <script>
-        // Version check - if you see this, cache is updated
-        console.log('CACHE REFRESH TEST - Version 2025-01-06-15:30');
         
         // Check for sign out parameter
         const urlParams = new URLSearchParams(window.location.search);
@@ -568,11 +566,9 @@
             
             // Initialize Firebase using centralized config
             await window.initializeFirebase();
-            console.log('Main site: Firebase initialized');
             
             // Initialize Firestore for profile data access  
             await window.initializeFirestore();
-            console.log('Main site: Firestore initialized');
             
             // Navigation elements - MUST be defined before updateNavigation calls
             const navCircle = document.getElementById('navCircle');
@@ -690,7 +686,6 @@
                 try {
                     const result = await window.signInWithPopup(window.auth, window.googleProvider);
                     const user = result.user;
-                    console.log('User signed in successfully:', user.email);
                     // Get token and redirect to dashboard
                     user.getIdToken().then((token) => {
                         window.location.href = `https://my.staycado.com?token=${token}`;
@@ -723,7 +718,6 @@
                 closeDropdown();
                 try {
                     await window.signOut(window.auth);
-                    console.log('User signed out successfully');
                 } catch (error) {
                     console.error('Error signing out:', error);
                 }

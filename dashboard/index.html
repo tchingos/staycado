@@ -376,14 +376,10 @@
             // Load user profile data to get avatar
             async function loadUserAvatar(userId) {
                 try {
-                    console.log('Dashboard: Loading avatar for userId:', userId);
                     const userDoc = await window.getDoc(window.doc(window.db, 'users', userId));
-                    console.log('Dashboard: User document exists:', userDoc.exists());
                     
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
-                        console.log('Dashboard: User data:', userData);
-                        console.log('Dashboard: Avatar URL:', userData.avatarUrl);
                         return userData.avatarUrl || null;
                     }
                 } catch (error) {
@@ -403,14 +399,9 @@
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token') || sessionStorage.getItem('authToken');
             
-            console.log('Dashboard: Checking authentication... (v2)');
-            console.log('Dashboard: URL params token:', urlParams.get('token'));
-            console.log('Dashboard: Session storage token:', sessionStorage.getItem('authToken'));
-            console.log('Dashboard: Final token:', token);
             
             if (token) {
                 // We have a token from the main site, user is authenticated
-                console.log('Dashboard: Token received from main site');
                 loading.classList.add('hidden');
                 dashboard.classList.remove('hidden');
                 
@@ -430,12 +421,9 @@
                             
                             // Load avatar and update navigation
                             if (userIdFromToken) {
-                                console.log('Dashboard: Loading avatar for token user:', userIdFromToken);
                                 const avatarUrl = await loadUserAvatar(userIdFromToken);
-                                console.log('Dashboard: Loaded avatar URL:', avatarUrl);
                                 updateNavigation(userEmailFromToken, avatarUrl);
                             } else {
-                                console.log('Dashboard: No user ID from token');
                                 updateNavigation(userEmailFromToken);
                             }
                         } else {
@@ -453,7 +441,6 @@
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else {
                 // No token, check Firebase auth normally
-                console.log('Dashboard: No token found, checking Firebase auth...');
                 let authCheckTimeout;
                 
                 window.onAuthStateChanged(window.auth, async (user) => {
