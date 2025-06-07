@@ -618,6 +618,9 @@
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token') || sessionStorage.getItem('authToken');
             
+            console.log('Profile page: Checking for token...', token ? 'Found' : 'Not found');
+            console.log('Profile page: Current URL:', window.location.href);
+            
             if (token) {
                 // We have a token from the main site
                 
@@ -665,6 +668,7 @@
                 }
             } else {
                 // No token - redirect to main site for authentication
+                console.log('Profile page: No token found, redirecting to main site');
                 window.location.href = 'https://staycado.com';
             }
             
