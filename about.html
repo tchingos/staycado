@@ -169,7 +169,7 @@
             <a href="request-invite.html" class="nav-link">Request Invite</a>
             <a href="about.html" class="nav-link">About</a>
         </nav>
-        <div class="auth-buttons">
+        <div class="auth-buttons" id="authButtons" style="visibility: hidden;">
             <button class="nav-btn" id="authButton">Sign In</button>
             <button class="nav-btn" id="signOutButton" style="display: none; margin-left: 0.5rem;">Sign Out</button>
         </div>
@@ -204,6 +204,7 @@
         window.addEventListener('load', function() {
             const authButton = document.getElementById('authButton');
             const signOutButton = document.getElementById('signOutButton');
+            const authButtons = document.getElementById('authButtons');
             let currentUser = null;
             
             // Listen for authentication state changes
@@ -218,6 +219,8 @@
                     authButton.textContent = 'Sign In';
                     signOutButton.style.display = 'none';
                 }
+                // Show buttons once auth state is determined
+                authButtons.style.visibility = 'visible';
             });
             
             // Handle auth button click
