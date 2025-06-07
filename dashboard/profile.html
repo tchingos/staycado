@@ -667,9 +667,10 @@
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             } else {
-                // No token - redirect to main site for authentication
+                // No token - redirect to main site for authentication with return URL
                 console.log('Profile page: No token found, redirecting to main site');
-                window.location.href = 'https://staycado.com';
+                const returnUrl = encodeURIComponent(window.location.href);
+                window.location.href = `https://staycado.com?return=${returnUrl}`;
             }
             
             // Load user profile data
