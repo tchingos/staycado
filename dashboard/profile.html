@@ -609,13 +609,8 @@
             
             // Sign out handler
             signOutMenuItem.addEventListener('click', async () => {
-                console.log('Sign out clicked from profile - clearing session and redirecting');
                 closeDropdown();
-                
-                // Clear session storage token
                 sessionStorage.removeItem('authToken');
-                
-                // Redirect to main site WITH signout parameter
                 window.location.href = 'https://staycado.com?signout=true';
             });
             

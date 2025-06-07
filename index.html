@@ -551,25 +551,17 @@
     </footer>
     
     <script>
-        // BASIC TEST - this should ALWAYS show up
-        console.log('MAIN SITE SCRIPT IS RUNNING');
-        console.log('Current URL:', window.location.href);
-        
-        // Check for sign out parameter IMMEDIATELY - before anything else
+        // Check for sign out parameter
         const urlParams = new URLSearchParams(window.location.search);
-        console.log('URL params:', urlParams.toString());
         const shouldSignOut = urlParams.get('signout') === 'true';
-        console.log('shouldSignOut:', shouldSignOut);
         
         if (shouldSignOut) {
-            console.log('SIGNOUT PARAMETER DETECTED!');
             // Clean up URL immediately
             window.history.replaceState({}, document.title, window.location.pathname);
         }
         
         // Wait for page load
         window.addEventListener('load', async function() {
-            console.log('Page load event fired');
             
             // Initialize Firebase using centralized config
             await window.initializeFirebase();
@@ -639,22 +631,14 @@
                 }
             }
             
-            // Handle signout parameter AFTER navigation elements and functions are ready
+            // Handle signout parameter
             if (shouldSignOut) {
-                console.log('Processing signout after navigation setup...');
                 try {
-                    // ALWAYS try to sign out from Firebase, regardless of detected user state
-                    console.log('Forcing Firebase signout...');
+                    // Sign out from Firebase
                     await window.signOut(window.auth);
-                    console.log('Firebase signout completed');
-                    
-                    // Force logged out state
-                    console.log('Forcing navigation to logged out state');
                     updateNavigation(null);
                 } catch (error) {
-                    console.error('Error signing out on main site:', error);
-                    // Still force logged out state even if signout failed
-                    console.log('Forcing navigation to logged out state despite error');
+                    console.error('Error signing out:', error);
                     updateNavigation(null);
                 }
             } else {

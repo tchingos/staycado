@@ -324,13 +324,6 @@
             const navCircleIcon = document.getElementById('navCircleIcon');
             const signOutMenuItem = document.getElementById('signOutMenuItem');
             
-            console.log('Dashboard elements found:', {
-                navCircle: !!navCircle,
-                navDropdown: !!navDropdown,
-                navCircleIcon: !!navCircleIcon,
-                signOutMenuItem: !!signOutMenuItem
-            });
-            
             let dropdownOpen = false;
             
             // Navigation circle click handler
@@ -374,13 +367,8 @@
             
             // Sign out handler
             signOutMenuItem.addEventListener('click', async () => {
-                console.log('Sign out clicked - clearing session and redirecting');
                 closeDropdown();
-                
-                // Clear session storage token
                 sessionStorage.removeItem('authToken');
-                
-                // Redirect to main site WITH signout parameter
                 window.location.href = 'https://staycado.com?signout=true';
             });
             
