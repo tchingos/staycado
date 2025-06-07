@@ -12,6 +12,11 @@ This file tracks planned features and improvements for future development.
 - [ ] Guest booking request system
 - [ ] Photo galleries for properties
 
+## Security Improvements
+- [ ] Fix Firebase Storage rules for cross-domain authentication
+- [ ] Implement proper authenticated uploads with token-based auth
+- [ ] Review and tighten security rules across all Firebase services
+
 ## Technical Improvements
 - [ ] Notification system for booking requests
 - [ ] Email templates for invitations and confirmations
