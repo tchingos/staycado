@@ -555,7 +555,9 @@
         window.addEventListener('load', async function() {
             // Handle sign out parameter before anything else
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('signout') === 'true') {
+            const shouldSignOut = urlParams.get('signout') === 'true';
+            
+            if (shouldSignOut) {
                 console.log('Sign out requested from dashboard - handling immediately');
                 // Clean up URL first
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -565,7 +567,7 @@
             await window.initializeFirebase();
             
             // If we detected signout, handle it after Firebase is ready
-            if (urlParams.get('signout') === 'true') {
+            if (shouldSignOut) {
                 console.log('Firebase ready, processing sign out...');
                 try {
                     if (window.auth.currentUser) {
