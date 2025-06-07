@@ -372,33 +372,16 @@
                 }
             }
             
-            // Sign out handler
-            console.log('Setting up sign out handler...');
+            // Sign out handler - SIMPLIFIED
             signOutMenuItem.addEventListener('click', async () => {
-                console.log('Sign out clicked on dashboard');
+                console.log('Sign out clicked - clearing session and redirecting');
                 closeDropdown();
-                try {
-                    console.log('Clearing session token...');
-                    // Clear session storage token (for token-based auth)
-                    sessionStorage.removeItem('authToken');
-                    
-                    console.log('Checking Firebase auth user:', window.auth.currentUser);
-                    // Try to sign out from Firebase Auth (if user is signed in via Firebase)
-                    if (window.auth.currentUser) {
-                        console.log('Signing out from Firebase...');
-                        await window.signOut(window.auth);
-                        console.log('Firebase sign out complete');
-                    }
-                    
-                    console.log('Redirecting to main site...');
-                    // Redirect to main page with sign out parameter to ensure main site also signs out
-                    window.location.href = 'https://staycado.com?signout=true';
-                } catch (error) {
-                    console.error('Error signing out:', error);
-                    // Even if Firebase sign out fails, clear token and redirect
-                    sessionStorage.removeItem('authToken');
-                    window.location.href = 'https://staycado.com?signout=true';
-                }
+                
+                // Clear session storage token
+                sessionStorage.removeItem('authToken');
+                
+                // Just redirect to main site (no signout parameter)
+                window.location.href = 'https://staycado.com';
             });
             
             // Check for auth token in URL or session storage
