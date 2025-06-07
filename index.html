@@ -565,9 +565,11 @@
             
             // Initialize Firebase using centralized config
             await window.initializeFirebase();
+            console.log('Main site: Firebase initialized');
             
-            // Initialize Firestore for profile data access
+            // Initialize Firestore for profile data access  
             await window.initializeFirestore();
+            console.log('Main site: Firestore initialized');
             
             // Navigation elements - MUST be defined before updateNavigation calls
             const navCircle = document.getElementById('navCircle');
