@@ -574,27 +574,7 @@
             // Initialize Firebase using centralized config
             await window.initializeFirebase();
             
-            // If we detected signout, handle it after Firebase is ready
-            if (shouldSignOut) {
-                console.log('Firebase ready, processing sign out...');
-                try {
-                    if (window.auth.currentUser) {
-                        await window.signOut(window.auth);
-                        console.log('User signed out successfully from main site');
-                    } else {
-                        console.log('No Firebase user to sign out');
-                    }
-                    // IMPORTANT: Force logged out state regardless of Firebase auth status
-                    console.log('Forcing navigation to logged out state');
-                    updateNavigation(null);
-                } catch (error) {
-                    console.error('Error signing out on main site:', error);
-                    // Still force logged out state even if there was an error
-                    updateNavigation(null);
-                }
-            }
-            
-            // Navigation elements
+            // Navigation elements - MUST be defined before updateNavigation calls
             const navCircle = document.getElementById('navCircle');
             const navDropdown = document.getElementById('navDropdown');
             const navCircleIcon = document.getElementById('navCircleIcon');
@@ -659,8 +639,28 @@
                 }
             }
             
-            // Initialize with logged out state
-            updateNavigation(null);
+            // Handle signout parameter AFTER navigation elements and functions are ready
+            if (shouldSignOut) {
+                console.log('Processing signout after navigation setup...');
+                try {
+                    if (window.auth.currentUser) {
+                        await window.signOut(window.auth);
+                        console.log('User signed out successfully from main site');
+                    } else {
+                        console.log('No Firebase user to sign out');
+                    }
+                    // IMPORTANT: Force logged out state regardless of Firebase auth status
+                    console.log('Forcing navigation to logged out state');
+                    updateNavigation(null);
+                } catch (error) {
+                    console.error('Error signing out on main site:', error);
+                    // Still force logged out state even if there was an error
+                    updateNavigation(null);
+                }
+            } else {
+                // Initialize with logged out state
+                updateNavigation(null);
+            }
             
             // Listen for authentication state changes
             window.onAuthStateChanged(window.auth, (user) => {
