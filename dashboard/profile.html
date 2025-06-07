@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Staycado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase App (core) -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGqtE8-zYcs4nnE_CScSUrxc85JBkMarY",
+            authDomain: "staycado.firebaseapp.com",
+            projectId: "staycado",
+            storageBucket: "staycado.firebasestorage.app",
+            messagingSenderId: "369348767227",
+            appId: "1:369348767227:web:c39e0fe4e04a499af12f5e",
+            measurementId: "G-K6S1YJL8DD"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        // Make auth and db available globally
+        window.auth = auth;
+        window.db = db;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9ff;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+        
+        .nav-link:hover {
+            color: #667eea;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .user-email {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #667eea;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .profile-section {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .profile-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .profile-section .subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .profile-section h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .profile-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <h2>Loading...</h2>
+    </div>
+    
+    <div id="profilePage" class="hidden">
+        <header class="header">
+            <div class="logo">Staycado</div>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Dashboard</a>
+                <a href="profile.html" class="nav-link" style="color: #667eea;">Profile</a>
+            </nav>
+            <div class="user-info">
+                <span id="userEmail" class="user-email"></span>
+                <a href="https://staycado.com" class="btn btn-secondary">Back to Site</a>
+                <button id="signOutBtn" class="btn">Sign Out</button>
+            </div>
+        </header>
+        
+        <div class="container">
+            <div class="profile-section">
+                <h1>Your Profile</h1>
+                <p class="subtitle">Tell us a bit about yourself to personalize your Staycado experience.</p>
+                
+                <div id="successMessage" class="success-message">
+                    Profile updated successfully!
+                </div>
+                
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" id="firstName" class="form-input" placeholder="Enter your first name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" id="lastName" class="form-input" placeholder="Enter your last name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location" class="form-label">Location</label>
+                        <input type="text" id="location" class="form-input" placeholder="City, State/Country" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Profile</button>
+                        <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Wait for Firebase to load
+        window.addEventListener('load', function() {
+            const loading = document.getElementById('loading');
+            const profilePage = document.getElementById('profilePage');
+            const userEmail = document.getElementById('userEmail');
+            const signOutBtn = document.getElementById('signOutBtn');
+            const profileForm = document.getElementById('profileForm');
+            const successMessage = document.getElementById('successMessage');
+            const cancelBtn = document.getElementById('cancelBtn');
+            
+            let currentUser = null;
+            
+            // Check for auth token in URL or use Firebase auth
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            if (token) {
+                // We have a token from the main site
+                console.log('Token received from main site');
+                loading.classList.add('hidden');
+                profilePage.classList.remove('hidden');
+                userEmail.textContent = 'Authenticated User';
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // For now, we'll need to get user info another way since we only have the token
+                // In a real app, you'd verify the token and get user details
+            } else {
+                // Check Firebase auth normally
+                window.onAuthStateChanged(window.auth, async (user) => {
+                    currentUser = user;
+                    loading.classList.add('hidden');
+                    
+                    if (user) {
+                        profilePage.classList.remove('hidden');
+                        userEmail.textContent = user.email;
+                        
+                        // Load existing profile data
+                        await loadUserProfile(user.uid);
+                    } else {
+                        window.location.href = 'https://staycado.com';
+                    }
+                });
+            }
+            
+            // Load user profile data
+            async function loadUserProfile(userId) {
+                try {
+                    const userDoc = await window.getDoc(window.doc(window.db, 'users', userId));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        document.getElementById('firstName').value = userData.firstName || '';
+                        document.getElementById('lastName').value = userData.lastName || '';
+                        document.getElementById('location').value = userData.location || '';
+                    }
+                } catch (error) {
+                    console.error('Error loading profile:', error);
+                }
+            }
+            
+            // Save profile data
+            async function saveUserProfile(userId, profileData) {
+                try {
+                    await window.setDoc(window.doc(window.db, 'users', userId), profileData, { merge: true });
+                    return true;
+                } catch (error) {
+                    console.error('Error saving profile:', error);
+                    return false;
+                }
+            }
+            
+            // Handle form submission
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const firstName = document.getElementById('firstName').value.trim();
+                const lastName = document.getElementById('lastName').value.trim();
+                const location = document.getElementById('location').value.trim();
+                
+                if (!firstName || !lastName || !location) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                const profileData = {
+                    firstName,
+                    lastName,
+                    location,
+                    email: currentUser?.email || 'authenticated@user.com',
+                    updatedAt: new Date().toISOString()
+                };
+                
+                if (currentUser) {
+                    const success = await saveUserProfile(currentUser.uid, profileData);
+                    if (success) {
+                        successMessage.style.display = 'block';
+                        setTimeout(() => {
+                            successMessage.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        alert('Error saving profile. Please try again.');
+                    }
+                } else {
+                    // For token-based auth, we'd need to implement a different save method
+                    console.log('Profile data:', profileData);
+                    successMessage.style.display = 'block';
+                    setTimeout(() => {
+                        successMessage.style.display = 'none';
+                    }, 3000);
+                }
+            });
+            
+            // Handle cancel
+            cancelBtn.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            
+            // Handle sign out
+            signOutBtn.addEventListener('click', async () => {
+                try {
+                    if (currentUser) {
+                        await window.signOut(window.auth);
+                    }
+                    window.location.href = 'https://staycado.com';
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                    window.location.href = 'https://staycado.com';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
