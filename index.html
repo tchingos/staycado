@@ -584,8 +584,13 @@
                     } else {
                         console.log('No Firebase user to sign out');
                     }
+                    // IMPORTANT: Force logged out state regardless of Firebase auth status
+                    console.log('Forcing navigation to logged out state');
+                    updateNavigation(null);
                 } catch (error) {
                     console.error('Error signing out on main site:', error);
+                    // Still force logged out state even if there was an error
+                    updateNavigation(null);
                 }
             }
             
