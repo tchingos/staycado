@@ -672,9 +672,9 @@
             window.onAuthStateChanged(window.auth, async (user) => {
                 currentUser = user;
                 if (user) {
-                    // Load avatar and update navigation
-                    const avatarUrl = await loadUserAvatar(user.uid);
-                    updateNavigation(user, avatarUrl);
+                    // Redirect authenticated users to dashboard
+                    window.location.href = 'https://my.staycado.com';
+                    return; // Don't update navigation since we're redirecting
                 } else {
                     updateNavigation(user);
                 }
