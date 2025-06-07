@@ -609,8 +609,17 @@
             // Sign out handler
             signOutMenuItem.addEventListener('click', async () => {
                 closeDropdown();
-                sessionStorage.removeItem('authToken');
-                window.location.href = 'https://staycado.com';
+                try {
+                    // Sign out from Firebase first
+                    await window.signOut(window.auth);
+                    sessionStorage.removeItem('authToken');
+                    window.location.href = 'https://staycado.com';
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                    // Still redirect even if sign out fails
+                    sessionStorage.removeItem('authToken');
+                    window.location.href = 'https://staycado.com';
+                }
             });
             
             // Check for auth token in URL or session storage
