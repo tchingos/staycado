@@ -418,34 +418,36 @@
                 sessionStorage.setItem('authToken', token);
                 
                 // Decode the Firebase token to get user info
-                try {
-                    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-                    const userEmailFromToken = tokenPayload.email;
-                    const userIdFromToken = tokenPayload.user_id || tokenPayload.sub;
-                    const userName = tokenPayload.name;
-                    
-                    if (userEmailFromToken) {
-                        welcomeEmail.textContent = userName || userEmailFromToken;
+                (async () => {
+                    try {
+                        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                        const userEmailFromToken = tokenPayload.email;
+                        const userIdFromToken = tokenPayload.user_id || tokenPayload.sub;
+                        const userName = tokenPayload.name;
                         
-                        // Load avatar and update navigation
-                        if (userIdFromToken) {
-                            console.log('Dashboard: Loading avatar for token user:', userIdFromToken);
-                            const avatarUrl = await loadUserAvatar(userIdFromToken);
-                            console.log('Dashboard: Loaded avatar URL:', avatarUrl);
-                            updateNavigation(userEmailFromToken, avatarUrl);
+                        if (userEmailFromToken) {
+                            welcomeEmail.textContent = userName || userEmailFromToken;
+                            
+                            // Load avatar and update navigation
+                            if (userIdFromToken) {
+                                console.log('Dashboard: Loading avatar for token user:', userIdFromToken);
+                                const avatarUrl = await loadUserAvatar(userIdFromToken);
+                                console.log('Dashboard: Loaded avatar URL:', avatarUrl);
+                                updateNavigation(userEmailFromToken, avatarUrl);
+                            } else {
+                                console.log('Dashboard: No user ID from token');
+                                updateNavigation(userEmailFromToken);
+                            }
                         } else {
-                            console.log('Dashboard: No user ID from token');
-                            updateNavigation(userEmailFromToken);
+                            welcomeEmail.textContent = 'Authenticated User';
+                            updateNavigation('Authenticated User');
                         }
-                    } else {
+                    } catch (error) {
+                        console.error('Error decoding token:', error);
                         welcomeEmail.textContent = 'Authenticated User';
                         updateNavigation('Authenticated User');
                     }
-                } catch (error) {
-                    console.error('Error decoding token:', error);
-                    welcomeEmail.textContent = 'Authenticated User';
-                    updateNavigation('Authenticated User');
-                }
+                })();
                 
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
