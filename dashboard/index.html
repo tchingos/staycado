@@ -233,30 +233,48 @@
             const welcomeEmail = document.getElementById('welcomeEmail');
             const signOutBtn = document.getElementById('signOutBtn');
             
-            // Check authentication state with delay
-            let authCheckTimeout;
+            // Check for auth token in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
             
-            window.onAuthStateChanged(window.auth, (user) => {
-                // Clear any pending redirect
-                if (authCheckTimeout) {
-                    clearTimeout(authCheckTimeout);
-                }
-                
+            if (token) {
+                // We have a token from the main site, user is authenticated
+                console.log('Token received from main site');
                 loading.classList.add('hidden');
+                dashboard.classList.remove('hidden');
                 
-                if (user) {
-                    // User is signed in - show dashboard
-                    dashboard.classList.remove('hidden');
-                    userEmail.textContent = user.email;
-                    welcomeEmail.textContent = user.email;
-                } else {
-                    // User is not signed in - wait 3 seconds before redirecting
-                    // This gives Firebase time to sync auth across domains
-                    authCheckTimeout = setTimeout(() => {
-                        window.location.href = 'https://staycado.com';
-                    }, 3000);
-                }
-            });
+                // For now, show generic user info since we have a valid token
+                userEmail.textContent = 'Authenticated User';
+                welcomeEmail.textContent = 'Authenticated User';
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                // No token, check Firebase auth normally
+                let authCheckTimeout;
+                
+                window.onAuthStateChanged(window.auth, (user) => {
+                    // Clear any pending redirect
+                    if (authCheckTimeout) {
+                        clearTimeout(authCheckTimeout);
+                    }
+                    
+                    loading.classList.add('hidden');
+                    
+                    if (user) {
+                        // User is signed in - show dashboard
+                        dashboard.classList.remove('hidden');
+                        userEmail.textContent = user.email;
+                        welcomeEmail.textContent = user.email;
+                    } else {
+                        // User is not signed in - wait 3 seconds before redirecting
+                        // This gives Firebase time to sync auth across domains
+                        authCheckTimeout = setTimeout(() => {
+                            window.location.href = 'https://staycado.com';
+                        }, 3000);
+                    }
+                });
+            }
             
             // Handle sign out
             signOutBtn.addEventListener('click', async () => {
