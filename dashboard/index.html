@@ -440,30 +440,8 @@
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else {
-                // No token, check Firebase auth normally
-                let authCheckTimeout;
-                
-                window.onAuthStateChanged(window.auth, async (user) => {
-                    // Clear any pending redirect
-                    if (authCheckTimeout) {
-                        clearTimeout(authCheckTimeout);
-                    }
-                    
-                    loading.classList.add('hidden');
-                    
-                    if (user) {
-                        // User is signed in - show dashboard
-                        dashboard.classList.remove('hidden');
-                        welcomeEmail.textContent = user.email;
-                        
-                        // Load avatar and update navigation
-                        const avatarUrl = await loadUserAvatar(user.uid);
-                        updateNavigation(user.email, avatarUrl);
-                    } else {
-                        // User is not signed in - redirect immediately to main site
-                        window.location.href = 'https://staycado.com';
-                    }
-                });
+                // No token - redirect to main site for authentication
+                window.location.href = 'https://staycado.com';
             }
         });
     </script>

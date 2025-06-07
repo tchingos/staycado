@@ -664,21 +664,8 @@
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             } else {
-                // Check Firebase auth normally
-                window.onAuthStateChanged(window.auth, async (user) => {
-                    currentUser = user;
-                    loading.classList.add('hidden');
-                    
-                    if (user) {
-                        profilePage.classList.remove('hidden');
-                        updateNavigation(user.email);
-                        
-                        // Load existing profile data
-                        await loadUserProfile(user.uid);
-                    } else {
-                        window.location.href = 'https://staycado.com';
-                    }
-                });
+                // No token - redirect to main site for authentication
+                window.location.href = 'https://staycado.com';
             }
             
             // Load user profile data
