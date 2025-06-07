@@ -703,18 +703,27 @@
             
             async function uploadAvatar(file, userId) {
                 try {
+                    console.log('Creating storage reference...');
+                    
                     // Create a reference to the avatar image
                     const avatarRef = window.ref(window.storage, `avatars/${userId}/${file.name}`);
+                    console.log('Storage reference created:', avatarRef.fullPath);
+                    
+                    console.log('Starting file upload...');
                     
                     // Upload the file
                     const snapshot = await window.uploadBytes(avatarRef, file);
+                    console.log('File uploaded successfully, getting download URL...');
                     
                     // Get the download URL
                     const downloadURL = await window.getDownloadURL(snapshot.ref);
+                    console.log('Download URL obtained:', downloadURL);
                     
                     return downloadURL;
                 } catch (error) {
-                    console.error('Error uploading avatar:', error);
+                    console.error('Error in uploadAvatar:', error);
+                    console.error('Error code:', error.code);
+                    console.error('Error message:', error.message);
                     throw error;
                 }
             }
@@ -739,19 +748,25 @@
                 const file = e.target.files[0];
                 if (!file) return;
                 
+                console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+                
                 // Validate file type
                 if (!file.type.startsWith('image/')) {
+                    console.error('Invalid file type:', file.type);
                     showToast('Please select an image file', 'error');
                     return;
                 }
                 
                 // Validate file size (max 5MB)
                 if (file.size > 5 * 1024 * 1024) {
+                    console.error('File too large:', file.size);
                     showToast('Please select an image smaller than 5MB', 'error');
                     return;
                 }
                 
                 try {
+                    console.log('Starting upload process...');
+                    
                     // Show uploading state
                     const avatarSection = document.querySelector('.avatar-section');
                     avatarSection.classList.add('avatar-uploading');
@@ -759,25 +774,34 @@
                     
                     // Get user ID
                     const userId = currentUser?.uid || window.tokenUserInfo?.uid;
+                    console.log('User ID:', userId);
+                    
                     if (!userId) {
                         throw new Error('No user ID available');
                     }
                     
+                    console.log('Uploading to Firebase Storage...');
+                    
                     // Upload to Firebase Storage
                     const avatarUrl = await uploadAvatar(file, userId);
+                    console.log('Upload successful, URL:', avatarUrl);
                     
                     // Update avatar display
                     updateAvatarDisplay(avatarUrl);
                     updateNavigation(currentUser?.email || window.tokenUserInfo?.email, avatarUrl);
                     
+                    console.log('Saving avatar URL to profile...');
+                    
                     // Save avatar URL to user profile
                     await saveUserProfile(userId, { avatarUrl });
                     
+                    console.log('Profile updated successfully');
                     showToast('Profile picture updated successfully!', 'success');
                     
                 } catch (error) {
                     console.error('Error uploading avatar:', error);
-                    showToast('Error uploading profile picture. Please try again.', 'error');
+                    console.error('Error details:', error.message, error.code, error.stack);
+                    showToast(`Error uploading profile picture: ${error.message}`, 'error');
                 } finally {
                     // Remove uploading state
                     const avatarSection = document.querySelector('.avatar-section');
