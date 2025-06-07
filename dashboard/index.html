@@ -372,7 +372,7 @@
                 }
             }
             
-            // Sign out handler - SIMPLIFIED
+            // Sign out handler
             signOutMenuItem.addEventListener('click', async () => {
                 console.log('Sign out clicked - clearing session and redirecting');
                 closeDropdown();
@@ -380,8 +380,8 @@
                 // Clear session storage token
                 sessionStorage.removeItem('authToken');
                 
-                // Just redirect to main site (no signout parameter)
-                window.location.href = 'https://staycado.com';
+                // Redirect to main site WITH signout parameter
+                window.location.href = 'https://staycado.com?signout=true';
             });
             
             // Check for auth token in URL or session storage

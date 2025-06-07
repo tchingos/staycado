@@ -609,24 +609,14 @@
             
             // Sign out handler
             signOutMenuItem.addEventListener('click', async () => {
+                console.log('Sign out clicked from profile - clearing session and redirecting');
                 closeDropdown();
-                try {
-                    // Clear session storage token (for token-based auth)
-                    sessionStorage.removeItem('authToken');
-                    
-                    // Try to sign out from Firebase Auth (if user is signed in via Firebase)
-                    if (window.auth.currentUser) {
-                        await window.signOut(window.auth);
-                    }
-                    
-                    // Redirect to main page with sign out parameter to ensure main site also signs out
-                    window.location.href = 'https://staycado.com?signout=true';
-                } catch (error) {
-                    console.error('Error signing out:', error);
-                    // Even if Firebase sign out fails, clear token and redirect
-                    sessionStorage.removeItem('authToken');
-                    window.location.href = 'https://staycado.com?signout=true';
-                }
+                
+                // Clear session storage token
+                sessionStorage.removeItem('authToken');
+                
+                // Redirect to main site WITH signout parameter
+                window.location.href = 'https://staycado.com?signout=true';
             });
             
             // Check for auth token in URL or session storage
