@@ -367,16 +367,22 @@
             
             // Sign out handler
             signOutMenuItem.addEventListener('click', async () => {
+                console.log('Sign out clicked on dashboard');
                 closeDropdown();
                 try {
+                    console.log('Clearing session token...');
                     // Clear session storage token (for token-based auth)
                     sessionStorage.removeItem('authToken');
                     
+                    console.log('Checking Firebase auth user:', window.auth.currentUser);
                     // Try to sign out from Firebase Auth (if user is signed in via Firebase)
                     if (window.auth.currentUser) {
+                        console.log('Signing out from Firebase...');
                         await window.signOut(window.auth);
+                        console.log('Firebase sign out complete');
                     }
                     
+                    console.log('Redirecting to main site...');
                     // Redirect to main page with sign out parameter to ensure main site also signs out
                     window.location.href = 'https://staycado.com?signout=true';
                 } catch (error) {
