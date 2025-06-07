@@ -266,6 +266,12 @@
             color: white;
             font-size: 20px;
             font-weight: 500;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         /* Navigation Dropdown */
@@ -358,6 +364,9 @@
             height: 100%;
             object-fit: cover;
             border-radius: 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         
         .avatar-overlay {
@@ -478,7 +487,7 @@
                     <h3 style="margin-bottom: 1rem; color: #333;">Profile Picture</h3>
                     <div class="avatar-container">
                         <div class="avatar-preview" id="avatarPreview">
-                            <span id="avatarInitial">?</span>
+                            <span id="avatarInitial" style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">?</span>
                             <div class="avatar-overlay">
                                 <div class="avatar-overlay-text">Click to<br>upload photo</div>
                             </div>
@@ -566,8 +575,8 @@
             
             function updateNavigation(userEmail, avatarUrl = null) {
                 if (avatarUrl) {
-                    // Show avatar image in navigation circle
-                    navCircleIcon.innerHTML = `<img src="${avatarUrl}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`;
+                    // Show avatar image in navigation circle with proper positioning
+                    navCircleIcon.innerHTML = `<img src="${avatarUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0;">`;
                 } else if (userEmail) {
                     navCircleIcon.textContent = userEmail.charAt(0).toUpperCase();
                 } else {
@@ -621,6 +630,15 @@
                         };
                         
                         console.log('User info from token:', window.tokenUserInfo);
+                        
+                        // Try to authenticate with Firebase using the token
+                        try {
+                            console.log('Attempting to sign in with custom token...');
+                            // Note: We'll need to use the token for Firebase Storage access
+                            // For now, let's see if the auth state changes
+                        } catch (authError) {
+                            console.warn('Could not authenticate with Firebase:', authError);
+                        }
                         
                         // Load existing profile data
                         if (userIdFromToken) {
@@ -698,15 +716,28 @@
                 const avatarPreview = document.getElementById('avatarPreview');
                 const avatarInitial = document.getElementById('avatarInitial');
                 
-                avatarInitial.innerHTML = `<img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                // Clear the initial and add the image with proper positioning
+                avatarInitial.innerHTML = `<img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; position: absolute; top: 0; left: 0;">`;
             }
             
             async function uploadAvatar(file, userId) {
                 try {
+                    console.log('Checking authentication state...');
+                    
+                    // Check if user is properly authenticated
+                    const currentAuthUser = window.auth.currentUser;
+                    console.log('Current auth user:', currentAuthUser);
+                    
+                    if (!currentAuthUser) {
+                        throw new Error('User not authenticated with Firebase Auth');
+                    }
+                    
                     console.log('Creating storage reference...');
                     
-                    // Create a reference to the avatar image
-                    const avatarRef = window.ref(window.storage, `avatars/${userId}/${file.name}`);
+                    // Create a reference to the avatar image with timestamp to avoid conflicts
+                    const timestamp = Date.now();
+                    const fileName = `avatar_${timestamp}_${file.name}`;
+                    const avatarRef = window.ref(window.storage, `avatars/${userId}/${fileName}`);
                     console.log('Storage reference created:', avatarRef.fullPath);
                     
                     console.log('Starting file upload...');
