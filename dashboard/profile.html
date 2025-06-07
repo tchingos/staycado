@@ -489,7 +489,6 @@
         
         <!-- Navigation Dropdown -->
         <div class="nav-dropdown" id="navDropdown">
-            <a href="https://staycado.com" class="nav-dropdown-item">Home Page</a>
             <a href="index.html" class="nav-dropdown-item">Dashboard</a>
             <a href="profile.html" class="nav-dropdown-item" style="color: #667eea;">Profile</a>
             <div class="nav-dropdown-divider"></div>
@@ -618,9 +617,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token') || sessionStorage.getItem('authToken');
             
-            console.log('Profile page: Checking for token...', token ? 'Found' : 'Not found');
-            console.log('Profile page: Current URL:', window.location.href);
-            
             if (token) {
                 // We have a token from the main site
                 
@@ -668,7 +664,6 @@
                 }
             } else {
                 // No token - redirect to main site for authentication with return URL
-                console.log('Profile page: No token found, redirecting to main site');
                 const returnUrl = encodeURIComponent(window.location.href);
                 window.location.href = `https://staycado.com?return=${returnUrl}`;
             }

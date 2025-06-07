@@ -675,7 +675,6 @@
                     // Check if there's a return URL parameter
                     const urlParams = new URLSearchParams(window.location.search);
                     const returnUrl = urlParams.get('return');
-                    console.log('Return URL detected:', returnUrl);
                     
                     if (returnUrl) {
                         // User came from a specific page - generate token and redirect back
@@ -684,12 +683,10 @@
                             const returnUrlObj = new URL(decodedReturnUrl);
                             returnUrlObj.searchParams.set('token', token);
                             const finalUrl = returnUrlObj.toString();
-                            console.log('Redirecting back to:', finalUrl);
                             window.location.href = finalUrl;
                         });
                     } else {
                         // Normal redirect to dashboard
-                        console.log('Normal redirect to dashboard');
                         window.location.href = 'https://my.staycado.com';
                     }
                     return; // Don't update navigation since we're redirecting
