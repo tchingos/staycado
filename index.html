@@ -551,6 +551,15 @@
     </footer>
     
     <script>
+        // Check for sign out parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const isSignOut = urlParams.get('signout') === 'true';
+        
+        if (isSignOut) {
+            // Clean up URL immediately
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
         // Wait for page load
         window.addEventListener('load', async function() {
             
@@ -645,6 +654,17 @@
             
             // Initialize with logged out state
             updateNavigation(null);
+            
+            // Handle sign out
+            if (isSignOut) {
+                try {
+                    await window.signOut(window.auth);
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                }
+                updateNavigation(null);
+                return; // Don't set up auth listener for sign out
+            }
             
             // Listen for authentication state changes
             window.onAuthStateChanged(window.auth, async (user) => {

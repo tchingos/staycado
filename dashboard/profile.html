@@ -613,12 +613,12 @@
                     // Sign out from Firebase first
                     await window.signOut(window.auth);
                     sessionStorage.removeItem('authToken');
-                    window.location.href = 'https://staycado.com';
+                    window.location.href = 'https://staycado.com?signout=true';
                 } catch (error) {
                     console.error('Error signing out:', error);
                     // Still redirect even if sign out fails
                     sessionStorage.removeItem('authToken');
-                    window.location.href = 'https://staycado.com';
+                    window.location.href = 'https://staycado.com?signout=true';
                 }
             });
             
