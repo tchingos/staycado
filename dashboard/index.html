@@ -376,13 +376,18 @@
             // Load user profile data to get avatar
             async function loadUserAvatar(userId) {
                 try {
+                    console.log('Dashboard: Loading avatar for userId:', userId);
                     const userDoc = await window.getDoc(window.doc(window.db, 'users', userId));
+                    console.log('Dashboard: User document exists:', userDoc.exists());
+                    
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
+                        console.log('Dashboard: User data:', userData);
+                        console.log('Dashboard: Avatar URL:', userData.avatarUrl);
                         return userData.avatarUrl || null;
                     }
                 } catch (error) {
-                    console.error('Error loading user avatar:', error);
+                    console.error('Dashboard: Error loading user avatar:', error);
                 }
                 return null;
             }
@@ -419,9 +424,12 @@
                         
                         // Load avatar and update navigation
                         if (userIdFromToken) {
+                            console.log('Dashboard: Loading avatar for token user:', userIdFromToken);
                             const avatarUrl = await loadUserAvatar(userIdFromToken);
+                            console.log('Dashboard: Loaded avatar URL:', avatarUrl);
                             updateNavigation(userEmailFromToken, avatarUrl);
                         } else {
+                            console.log('Dashboard: No user ID from token');
                             updateNavigation(userEmailFromToken);
                         }
                     } else {
