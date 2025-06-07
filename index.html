@@ -452,11 +452,10 @@
     
     <!-- Navigation Dropdown -->
     <div class="nav-dropdown" id="navDropdown">
-        <div id="loggedOutMenu">
+        <div id="loggedOutMenu" class="hidden">
             <button class="nav-dropdown-item" id="signInMenuItem">Sign In with Google</button>
         </div>
         <div id="loggedInMenu" class="hidden">
-            <a href="https://staycado.com" class="nav-dropdown-item">Home Page</a>
             <button class="nav-dropdown-item" id="dashboardMenuItem">Dashboard</button>
             <button class="nav-dropdown-item" id="profileMenuItem">Profile</button>
             <div class="nav-dropdown-divider"></div>
@@ -605,19 +604,16 @@
             }
             
             function updateNavigation(user) {
-                console.log('updateNavigation called with user:', user); // Debug log
                 if (user) {
                     // User is signed in
                     navCircleIcon.textContent = user.email ? user.email.charAt(0).toUpperCase() : '👤';
                     loggedOutMenu.classList.add('hidden');
                     loggedInMenu.classList.remove('hidden');
-                    console.log('Showing logged in menu'); // Debug log
                 } else {
                     // User is signed out
                     navCircleIcon.textContent = '👤';
                     loggedInMenu.classList.add('hidden');
                     loggedOutMenu.classList.remove('hidden');
-                    console.log('Showing logged out menu'); // Debug log
                 }
             }
             
