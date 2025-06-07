@@ -286,6 +286,108 @@
             display: none;
         }
         
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b9d;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.3);
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.error {
+            background: #e74c3c;
+            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.3);
+        }
+        
+        /* Navigation Circle */
+        .nav-circle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10001;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .nav-circle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-circle-icon {
+            color: white;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        
+        /* Navigation Dropdown */
+        .nav-dropdown {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            padding: 8px 0;
+            min-width: 180px;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        
+        .nav-dropdown.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        
+        .nav-dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background-color 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .nav-dropdown-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .nav-dropdown-divider {
+            height: 1px;
+            background-color: #ddd;
+            margin: 4px 0;
+        }
+        
         /* Footer */
         .footer {
             background: #333;
@@ -339,11 +441,26 @@
             <a href="#about" class="nav-link">About</a>
             <a href="#invite" class="nav-link">Get Started</a>
         </nav>
-        <div class="auth-buttons" id="authButtons" style="visibility: hidden;">
-            <button class="nav-btn" id="authButton">Sign In</button>
-            <button class="nav-btn" id="signOutButton" style="display: none;">Sign Out</button>
-        </div>
     </header>
+    
+    <!-- Navigation Circle -->
+    <div class="nav-circle" id="navCircle">
+        <div class="nav-circle-icon" id="navCircleIcon">👤</div>
+    </div>
+    
+    <!-- Navigation Dropdown -->
+    <div class="nav-dropdown" id="navDropdown">
+        <div id="loggedOutMenu" class="hidden">
+            <button class="nav-dropdown-item" id="signInMenuItem">Sign In with Google</button>
+        </div>
+        <div id="loggedInMenu" class="hidden">
+            <a href="https://staycado.com" class="nav-dropdown-item">Home Page</a>
+            <button class="nav-dropdown-item" id="dashboardMenuItem">Dashboard</button>
+            <button class="nav-dropdown-item" id="profileMenuItem">Profile</button>
+            <div class="nav-dropdown-divider"></div>
+            <button class="nav-dropdown-item" id="signOutMenuItem">Sign Out</button>
+        </div>
+    </div>
     
     <!-- Hero Section -->
     <section id="home" class="hero">
@@ -438,53 +555,110 @@
             // Initialize Firebase using centralized config
             await window.initializeFirebase();
             
-            const authButton = document.getElementById('authButton');
-            const signOutButton = document.getElementById('signOutButton');
-            const authButtons = document.getElementById('authButtons');
+            // Navigation elements
+            const navCircle = document.getElementById('navCircle');
+            const navDropdown = document.getElementById('navDropdown');
+            const navCircleIcon = document.getElementById('navCircleIcon');
+            const loggedOutMenu = document.getElementById('loggedOutMenu');
+            const loggedInMenu = document.getElementById('loggedInMenu');
+            
+            // Menu items
+            const signInMenuItem = document.getElementById('signInMenuItem');
+            const dashboardMenuItem = document.getElementById('dashboardMenuItem');
+            const profileMenuItem = document.getElementById('profileMenuItem');
+            const signOutMenuItem = document.getElementById('signOutMenuItem');
+            
             let currentUser = null;
+            let dropdownOpen = false;
+            
+            // Navigation circle click handler
+            navCircle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDropdown();
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!navDropdown.contains(e.target) && !navCircle.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+            
+            function toggleDropdown() {
+                if (dropdownOpen) {
+                    closeDropdown();
+                } else {
+                    openDropdown();
+                }
+            }
+            
+            function openDropdown() {
+                navDropdown.classList.add('show');
+                dropdownOpen = true;
+            }
+            
+            function closeDropdown() {
+                navDropdown.classList.remove('show');
+                dropdownOpen = false;
+            }
+            
+            function updateNavigation(user) {
+                if (user) {
+                    // User is signed in
+                    navCircleIcon.textContent = user.email ? user.email.charAt(0).toUpperCase() : '👤';
+                    loggedOutMenu.classList.add('hidden');
+                    loggedInMenu.classList.remove('hidden');
+                } else {
+                    // User is signed out
+                    navCircleIcon.textContent = '👤';
+                    loggedInMenu.classList.add('hidden');
+                    loggedOutMenu.classList.remove('hidden');
+                }
+            }
             
             // Listen for authentication state changes
             window.onAuthStateChanged(window.auth, (user) => {
                 currentUser = user;
-                if (user) {
-                    // User is signed in - show dashboard button and sign out option
-                    authButton.textContent = 'Dashboard';
-                    signOutButton.style.display = 'inline-block';
-                } else {
-                    // User is signed out
-                    authButton.textContent = 'Sign In';
-                    signOutButton.style.display = 'none';
-                }
-                // Show buttons once auth state is determined
-                authButtons.style.visibility = 'visible';
+                updateNavigation(user);
             });
             
-            // Handle auth button click
-            authButton.addEventListener('click', async () => {
+            // Menu item click handlers
+            signInMenuItem.addEventListener('click', async () => {
+                closeDropdown();
+                try {
+                    const result = await window.signInWithPopup(window.auth, window.googleProvider);
+                    const user = result.user;
+                    console.log('User signed in successfully:', user.email);
+                    // Get token and redirect to dashboard
+                    user.getIdToken().then((token) => {
+                        window.location.href = `https://my.staycado.com?token=${token}`;
+                    });
+                } catch (error) {
+                    console.error('Error signing in:', error);
+                    showToast('Error signing in. Please try again.', 'error');
+                }
+            });
+            
+            dashboardMenuItem.addEventListener('click', async () => {
+                closeDropdown();
                 if (currentUser) {
-                    // Go to dashboard - pass user token for cross-domain auth
                     currentUser.getIdToken().then((token) => {
                         window.location.href = `https://my.staycado.com?token=${token}`;
                     });
-                } else {
-                    // Sign in with Google
-                    try {
-                        const result = await window.signInWithPopup(window.auth, window.googleProvider);
-                        const user = result.user;
-                        console.log('User signed in successfully:', user.email);
-                        // Get token and redirect to dashboard
-                        user.getIdToken().then((token) => {
-                            window.location.href = `https://my.staycado.com?token=${token}`;
-                        });
-                    } catch (error) {
-                        console.error('Error signing in:', error);
-                        alert('Error signing in. Please try again.');
-                    }
                 }
             });
             
-            // Handle sign out button click
-            signOutButton.addEventListener('click', async () => {
+            profileMenuItem.addEventListener('click', async () => {
+                closeDropdown();
+                if (currentUser) {
+                    currentUser.getIdToken().then((token) => {
+                        window.location.href = `https://my.staycado.com/profile.html?token=${token}`;
+                    });
+                }
+            });
+            
+            signOutMenuItem.addEventListener('click', async () => {
+                closeDropdown();
                 try {
                     await window.signOut(window.auth);
                     console.log('User signed out successfully');
@@ -506,6 +680,20 @@
                     thankYouMessage.style.display = 'block';
                 }
             });
+            
+            // Toast notification function
+            function showToast(message, type = 'default') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+                
+                setTimeout(() => toast.classList.add('show'), 100);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => document.body.removeChild(toast), 300);
+                }, 3000);
+            }
         });
     </script>
 </body>
