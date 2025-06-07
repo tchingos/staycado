@@ -233,8 +233,15 @@
             const welcomeEmail = document.getElementById('welcomeEmail');
             const signOutBtn = document.getElementById('signOutBtn');
             
-            // Check authentication state
+            // Check authentication state with delay
+            let authCheckTimeout;
+            
             window.onAuthStateChanged(window.auth, (user) => {
+                // Clear any pending redirect
+                if (authCheckTimeout) {
+                    clearTimeout(authCheckTimeout);
+                }
+                
                 loading.classList.add('hidden');
                 
                 if (user) {
@@ -243,8 +250,11 @@
                     userEmail.textContent = user.email;
                     welcomeEmail.textContent = user.email;
                 } else {
-                    // User is not signed in - redirect to home
-                    window.location.href = 'https://staycado.com';
+                    // User is not signed in - wait 3 seconds before redirecting
+                    // This gives Firebase time to sync auth across domains
+                    authCheckTimeout = setTimeout(() => {
+                        window.location.href = 'https://staycado.com';
+                    }, 3000);
                 }
             });
             
