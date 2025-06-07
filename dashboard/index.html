@@ -460,11 +460,8 @@
                         const avatarUrl = await loadUserAvatar(user.uid);
                         updateNavigation(user.email, avatarUrl);
                     } else {
-                        // User is not signed in - wait longer before redirecting
-                        // This gives Firebase time to sync auth across domains and prevents redirect loops
-                        authCheckTimeout = setTimeout(() => {
-                            window.location.href = 'https://staycado.com';
-                        }, 5000);
+                        // User is not signed in - redirect immediately to main site
+                        window.location.href = 'https://staycado.com';
                     }
                 });
             }
