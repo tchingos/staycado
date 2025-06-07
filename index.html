@@ -625,14 +625,17 @@
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('signout') === 'true') {
                 console.log('Sign out requested from dashboard');
-                try {
-                    if (window.auth.currentUser) {
-                        await window.signOut(window.auth);
-                        console.log('User signed out successfully');
+                // Handle sign out asynchronously
+                (async () => {
+                    try {
+                        if (window.auth.currentUser) {
+                            await window.signOut(window.auth);
+                            console.log('User signed out successfully');
+                        }
+                    } catch (error) {
+                        console.error('Error signing out:', error);
                     }
-                } catch (error) {
-                    console.error('Error signing out:', error);
-                }
+                })();
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
