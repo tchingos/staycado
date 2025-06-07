@@ -551,9 +551,15 @@
     </footer>
     
     <script>
+        // BASIC TEST - this should ALWAYS show up
+        console.log('MAIN SITE SCRIPT IS RUNNING');
+        console.log('Current URL:', window.location.href);
+        
         // Check for sign out parameter IMMEDIATELY - before anything else
         const urlParams = new URLSearchParams(window.location.search);
+        console.log('URL params:', urlParams.toString());
         const shouldSignOut = urlParams.get('signout') === 'true';
+        console.log('shouldSignOut:', shouldSignOut);
         
         if (shouldSignOut) {
             console.log('SIGNOUT PARAMETER DETECTED!');
