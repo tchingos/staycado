@@ -216,7 +216,10 @@
             <a href="request-invite.html" class="nav-link">Request Invite</a>
             <a href="about.html" class="nav-link">About</a>
         </nav>
-        <button class="nav-btn" id="authButton">Sign In</button>
+        <div class="auth-buttons">
+            <button class="nav-btn" id="authButton">Sign In</button>
+            <button class="nav-btn" id="signOutButton" style="display: none; margin-left: 0.5rem;">Sign Out</button>
+        </div>
     </header>
     
     <section class="hero">
@@ -249,18 +252,21 @@
         // Wait for Firebase to load
         window.addEventListener('load', function() {
             const authButton = document.getElementById('authButton');
+            const signOutButton = document.getElementById('signOutButton');
             let currentUser = null;
             
             // Listen for authentication state changes
             window.onAuthStateChanged(window.auth, (user) => {
                 currentUser = user;
                 if (user) {
-                    // User is signed in - update button
+                    // User is signed in - show dashboard button and sign out option
                     authButton.textContent = 'Dashboard';
+                    signOutButton.style.display = 'inline-block';
                     console.log('User signed in:', user.email);
                 } else {
                     // User is signed out
                     authButton.textContent = 'Sign In';
+                    signOutButton.style.display = 'none';
                     console.log('User signed out');
                 }
             });
@@ -286,6 +292,16 @@
                         console.error('Error signing in:', error);
                         alert('Error signing in. Please try again.');
                     }
+                }
+            });
+            
+            // Handle sign out button click
+            signOutButton.addEventListener('click', async () => {
+                try {
+                    await window.signOut(window.auth);
+                    console.log('User signed out successfully');
+                } catch (error) {
+                    console.error('Error signing out:', error);
                 }
             });
         });
