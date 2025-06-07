@@ -12,6 +12,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         const firebaseConfig = {
             apiKey: "AIzaSyBGqtE8-zYcs4nnE_CScSUrxc85JBkMarY",
@@ -26,11 +27,15 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
         
-        // Make auth available globally
+        // Make Firebase services available globally
         window.auth = auth;
+        window.db = db;
         window.signOut = signOut;
         window.onAuthStateChanged = onAuthStateChanged;
+        window.doc = doc;
+        window.getDoc = getDoc;
     </script>
     <style>
         * {
@@ -357,12 +362,29 @@
                 dropdownOpen = false;
             }
             
-            function updateNavigation(userEmail) {
-                if (userEmail) {
+            function updateNavigation(userEmail, avatarUrl = null) {
+                if (avatarUrl) {
+                    // Show avatar image in navigation circle
+                    navCircleIcon.innerHTML = `<img src="${avatarUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0;">`;
+                } else if (userEmail) {
                     navCircleIcon.textContent = userEmail.charAt(0).toUpperCase();
                 } else {
                     navCircleIcon.textContent = '👤';
                 }
+            }
+            
+            // Load user profile data to get avatar
+            async function loadUserAvatar(userId) {
+                try {
+                    const userDoc = await window.getDoc(window.doc(window.db, 'users', userId));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        return userData.avatarUrl || null;
+                    }
+                } catch (error) {
+                    console.error('Error loading user avatar:', error);
+                }
+                return null;
             }
             
             // Sign out handler
@@ -389,11 +411,19 @@
                 try {
                     const tokenPayload = JSON.parse(atob(token.split('.')[1]));
                     const userEmailFromToken = tokenPayload.email;
+                    const userIdFromToken = tokenPayload.user_id || tokenPayload.sub;
                     const userName = tokenPayload.name;
                     
                     if (userEmailFromToken) {
                         welcomeEmail.textContent = userName || userEmailFromToken;
-                        updateNavigation(userEmailFromToken);
+                        
+                        // Load avatar and update navigation
+                        if (userIdFromToken) {
+                            const avatarUrl = await loadUserAvatar(userIdFromToken);
+                            updateNavigation(userEmailFromToken, avatarUrl);
+                        } else {
+                            updateNavigation(userEmailFromToken);
+                        }
                     } else {
                         welcomeEmail.textContent = 'Authenticated User';
                         updateNavigation('Authenticated User');
@@ -422,7 +452,10 @@
                         // User is signed in - show dashboard
                         dashboard.classList.remove('hidden');
                         welcomeEmail.textContent = user.email;
-                        updateNavigation(user.email);
+                        
+                        // Load avatar and update navigation
+                        const avatarUrl = await loadUserAvatar(user.uid);
+                        updateNavigation(user.email, avatarUrl);
                     } else {
                         // User is not signed in - wait 3 seconds before redirecting
                         // This gives Firebase time to sync auth across domains

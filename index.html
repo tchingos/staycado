@@ -566,6 +566,9 @@
             // Initialize Firebase using centralized config
             await window.initializeFirebase();
             
+            // Initialize Firestore for profile data access
+            await window.initializeFirestore();
+            
             // Navigation elements - MUST be defined before updateNavigation calls
             const navCircle = document.getElementById('navCircle');
             const navDropdown = document.getElementById('navDropdown');
@@ -613,22 +616,40 @@
                 dropdownOpen = false;
             }
             
-            function updateNavigation(user) {
+            function updateNavigation(user, avatarUrl = null) {
                 if (user) {
-                    // User is signed in - FORCE hide logged out menu
-                    navCircleIcon.textContent = user.email ? user.email.charAt(0).toUpperCase() : '👤';
+                    // User is signed in - show avatar or initial
+                    if (avatarUrl) {
+                        navCircleIcon.innerHTML = `<img src="${avatarUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; position: absolute; top: 0; left: 0;">`;
+                    } else {
+                        navCircleIcon.textContent = user.email ? user.email.charAt(0).toUpperCase() : '👤';
+                    }
                     loggedOutMenu.style.display = 'none';
                     loggedOutMenu.classList.add('hidden');
                     loggedInMenu.style.display = 'block';
                     loggedInMenu.classList.remove('hidden');
                 } else {
-                    // User is signed out - FORCE hide logged in menu
+                    // User is signed out
                     navCircleIcon.textContent = '👤';
                     loggedInMenu.style.display = 'none';
                     loggedInMenu.classList.add('hidden');
                     loggedOutMenu.style.display = 'block';
                     loggedOutMenu.classList.remove('hidden');
                 }
+            }
+            
+            // Load user profile data to get avatar
+            async function loadUserAvatar(userId) {
+                try {
+                    const userDoc = await window.getDoc(window.doc(window.db, 'users', userId));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        return userData.avatarUrl || null;
+                    }
+                } catch (error) {
+                    console.error('Error loading user avatar:', error);
+                }
+                return null;
             }
             
             // Handle signout parameter
@@ -647,9 +668,15 @@
             }
             
             // Listen for authentication state changes
-            window.onAuthStateChanged(window.auth, (user) => {
+            window.onAuthStateChanged(window.auth, async (user) => {
                 currentUser = user;
-                updateNavigation(user);
+                if (user) {
+                    // Load avatar and update navigation
+                    const avatarUrl = await loadUserAvatar(user.uid);
+                    updateNavigation(user, avatarUrl);
+                } else {
+                    updateNavigation(user);
+                }
             });
             
             // Menu item click handlers
