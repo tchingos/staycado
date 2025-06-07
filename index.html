@@ -551,16 +551,6 @@
     </footer>
     
     <script>
-        
-        // Check for sign out parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const shouldSignOut = urlParams.get('signout') === 'true';
-        
-        if (shouldSignOut) {
-            // Clean up URL immediately
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-        
         // Wait for page load
         window.addEventListener('load', async function() {
             
@@ -653,20 +643,8 @@
                 return null;
             }
             
-            // Handle signout parameter
-            if (shouldSignOut) {
-                try {
-                    // Sign out from Firebase
-                    await window.signOut(window.auth);
-                    updateNavigation(null);
-                } catch (error) {
-                    console.error('Error signing out:', error);
-                    updateNavigation(null);
-                }
-            } else {
-                // Initialize with logged out state
-                updateNavigation(null);
-            }
+            // Initialize with logged out state
+            updateNavigation(null);
             
             // Listen for authentication state changes
             window.onAuthStateChanged(window.auth, async (user) => {

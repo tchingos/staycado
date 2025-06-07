@@ -391,7 +391,7 @@
             signOutMenuItem.addEventListener('click', async () => {
                 closeDropdown();
                 sessionStorage.removeItem('authToken');
-                window.location.href = 'https://staycado.com?signout=true';
+                window.location.href = 'https://staycado.com';
             });
             
             // Check for auth token in URL or session storage
