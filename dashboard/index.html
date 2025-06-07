@@ -369,11 +369,21 @@
             signOutMenuItem.addEventListener('click', async () => {
                 closeDropdown();
                 try {
-                    await window.signOut(window.auth);
-                    window.location.href = 'https://staycado.com';
+                    // Clear session storage token (for token-based auth)
+                    sessionStorage.removeItem('authToken');
+                    
+                    // Try to sign out from Firebase Auth (if user is signed in via Firebase)
+                    if (window.auth.currentUser) {
+                        await window.signOut(window.auth);
+                    }
+                    
+                    // Redirect to main page with sign out parameter to ensure main site also signs out
+                    window.location.href = 'https://staycado.com?signout=true';
                 } catch (error) {
                     console.error('Error signing out:', error);
-                    window.location.href = 'https://staycado.com';
+                    // Even if Firebase sign out fails, clear token and redirect
+                    sessionStorage.removeItem('authToken');
+                    window.location.href = 'https://staycado.com?signout=true';
                 }
             });
             
