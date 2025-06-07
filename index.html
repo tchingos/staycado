@@ -605,14 +605,18 @@
             
             function updateNavigation(user) {
                 if (user) {
-                    // User is signed in
+                    // User is signed in - FORCE hide logged out menu
                     navCircleIcon.textContent = user.email ? user.email.charAt(0).toUpperCase() : '👤';
+                    loggedOutMenu.style.display = 'none';
                     loggedOutMenu.classList.add('hidden');
+                    loggedInMenu.style.display = 'block';
                     loggedInMenu.classList.remove('hidden');
                 } else {
-                    // User is signed out
+                    // User is signed out - FORCE hide logged in menu
                     navCircleIcon.textContent = '👤';
+                    loggedInMenu.style.display = 'none';
                     loggedInMenu.classList.add('hidden');
+                    loggedOutMenu.style.display = 'block';
                     loggedOutMenu.classList.remove('hidden');
                 }
             }
