@@ -724,12 +724,15 @@
                 try {
                     console.log('Checking authentication state...');
                     
-                    // Check if user is properly authenticated
+                    // Check if user is properly authenticated (either via Firebase Auth or token)
                     const currentAuthUser = window.auth.currentUser;
+                    const tokenUser = window.tokenUserInfo;
                     console.log('Current auth user:', currentAuthUser);
+                    console.log('Token user info:', tokenUser);
                     
-                    if (!currentAuthUser) {
-                        throw new Error('User not authenticated with Firebase Auth');
+                    // Allow upload if user is authenticated via either method
+                    if (!currentAuthUser && !tokenUser) {
+                        throw new Error('User not authenticated');
                     }
                     
                     console.log('Creating storage reference...');
