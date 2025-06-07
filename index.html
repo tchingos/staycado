@@ -551,10 +551,33 @@
     </footer>
     
     <script>
-        // Wait for Firebase to load and initialize
+        // Check for sign out parameter IMMEDIATELY on page load
         window.addEventListener('load', async function() {
+            // Handle sign out parameter before anything else
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('signout') === 'true') {
+                console.log('Sign out requested from dashboard - handling immediately');
+                // Clean up URL first
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
             // Initialize Firebase using centralized config
             await window.initializeFirebase();
+            
+            // If we detected signout, handle it after Firebase is ready
+            if (urlParams.get('signout') === 'true') {
+                console.log('Firebase ready, processing sign out...');
+                try {
+                    if (window.auth.currentUser) {
+                        await window.signOut(window.auth);
+                        console.log('User signed out successfully from main site');
+                    } else {
+                        console.log('No Firebase user to sign out');
+                    }
+                } catch (error) {
+                    console.error('Error signing out on main site:', error);
+                }
+            }
             
             // Navigation elements
             const navCircle = document.getElementById('navCircle');
@@ -619,32 +642,6 @@
                     loggedOutMenu.style.display = 'block';
                     loggedOutMenu.classList.remove('hidden');
                 }
-            }
-            
-            // Check for sign out parameter from dashboard FIRST
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('signout') === 'true') {
-                console.log('Sign out requested from dashboard');
-                
-                // Immediately show logged out state
-                updateNavigation(null);
-                
-                // Sign out and clean up URL without waiting
-                (async () => {
-                    try {
-                        if (window.auth.currentUser) {
-                            await window.signOut(window.auth);
-                            console.log('User signed out successfully');
-                        }
-                    } catch (error) {
-                        console.error('Error signing out:', error);
-                    }
-                    // Clean up URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                })();
-                
-                // Don't set up auth listener when signing out
-                return;
             }
             
             // Initialize with logged out state
