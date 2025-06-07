@@ -605,18 +605,24 @@
             }
             
             function updateNavigation(user) {
+                console.log('updateNavigation called with user:', user); // Debug log
                 if (user) {
                     // User is signed in
                     navCircleIcon.textContent = user.email ? user.email.charAt(0).toUpperCase() : '👤';
                     loggedOutMenu.classList.add('hidden');
                     loggedInMenu.classList.remove('hidden');
+                    console.log('Showing logged in menu'); // Debug log
                 } else {
                     // User is signed out
                     navCircleIcon.textContent = '👤';
                     loggedInMenu.classList.add('hidden');
                     loggedOutMenu.classList.remove('hidden');
+                    console.log('Showing logged out menu'); // Debug log
                 }
             }
+            
+            // Initialize with logged out state
+            updateNavigation(null);
             
             // Listen for authentication state changes
             window.onAuthStateChanged(window.auth, (user) => {
