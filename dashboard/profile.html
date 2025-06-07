@@ -294,17 +294,21 @@
             
             let currentUser = null;
             
-            // Check for auth token in URL or use Firebase auth
+            // Check for auth token in URL or session storage
             const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
+            const token = urlParams.get('token') || sessionStorage.getItem('authToken');
             
             if (token) {
                 // We have a token from the main site
-                console.log('Token received from main site');
+                console.log('Token received - user authenticated');
                 loading.classList.add('hidden');
                 profilePage.classList.remove('hidden');
                 userEmail.textContent = 'Authenticated User';
-                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Clean up URL if token was in URL
+                if (urlParams.get('token')) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
                 
                 // For now, we'll need to get user info another way since we only have the token
                 // In a real app, you'd verify the token and get user details

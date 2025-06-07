@@ -251,6 +251,9 @@
                 userEmail.textContent = 'Authenticated User';
                 welcomeEmail.textContent = 'Authenticated User';
                 
+                // Store token for navigation to other pages
+                sessionStorage.setItem('authToken', token);
+                
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else {
