@@ -301,28 +301,40 @@
             if (token) {
                 // We have a token from the main site
                 console.log('Token received - user authenticated');
+                
+                // Show page first, then try to decode token
                 loading.classList.add('hidden');
                 profilePage.classList.remove('hidden');
+                userEmail.textContent = 'Authenticated User';
                 
-                // Decode the Firebase token to get user info
+                // Try to decode the Firebase token to get user info
                 try {
+                    console.log('Attempting to decode token...');
                     const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                    console.log('Token payload:', tokenPayload);
+                    
                     const userEmailFromToken = tokenPayload.email;
                     const userIdFromToken = tokenPayload.user_id || tokenPayload.sub;
                     
-                    userEmail.textContent = userEmailFromToken;
-                    
-                    // Store user info for saving profile
-                    window.tokenUserInfo = {
-                        email: userEmailFromToken,
-                        uid: userIdFromToken
-                    };
-                    
-                    // Load existing profile data
-                    await loadUserProfile(userIdFromToken);
+                    if (userEmailFromToken) {
+                        userEmail.textContent = userEmailFromToken;
+                        
+                        // Store user info for saving profile
+                        window.tokenUserInfo = {
+                            email: userEmailFromToken,
+                            uid: userIdFromToken
+                        };
+                        
+                        console.log('User info from token:', window.tokenUserInfo);
+                        
+                        // Load existing profile data
+                        if (userIdFromToken) {
+                            await loadUserProfile(userIdFromToken);
+                        }
+                    }
                 } catch (error) {
                     console.error('Error decoding token:', error);
-                    userEmail.textContent = 'Authenticated User';
+                    console.log('Using basic authentication fallback');
                 }
                 
                 // Clean up URL if token was in URL
