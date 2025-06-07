@@ -672,8 +672,17 @@
             window.onAuthStateChanged(window.auth, async (user) => {
                 currentUser = user;
                 if (user) {
-                    // Redirect authenticated users to dashboard
-                    window.location.href = 'https://my.staycado.com';
+                    // Check if this is a redirect loop (came from dashboard without token)
+                    const referrer = document.referrer;
+                    if (referrer && referrer.includes('my.staycado.com')) {
+                        // User came from dashboard - generate token and redirect properly
+                        user.getIdToken().then((token) => {
+                            window.location.href = `https://my.staycado.com?token=${token}`;
+                        });
+                    } else {
+                        // Normal redirect to dashboard
+                        window.location.href = 'https://my.staycado.com';
+                    }
                     return; // Don't update navigation since we're redirecting
                 } else {
                     updateNavigation(user);
