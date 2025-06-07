@@ -674,11 +674,16 @@
                 if (user) {
                     // Check if this is a redirect loop (came from dashboard without token)
                     const referrer = document.referrer;
+                    console.log('Referrer detected:', referrer);
                     if (referrer && referrer.includes('my.staycado.com')) {
                         // User came from dashboard - generate token and redirect back to original page
                         user.getIdToken().then((token) => {
-                            // Redirect back to the same page they came from, with token
-                            window.location.href = `${referrer}?token=${token}`;
+                            // Clean the referrer URL and add token
+                            const referrerUrl = new URL(referrer);
+                            referrerUrl.searchParams.set('token', token);
+                            const finalUrl = referrerUrl.toString();
+                            console.log('Redirecting back to:', finalUrl);
+                            window.location.href = finalUrl;
                         });
                     } else {
                         // Normal redirect to dashboard
