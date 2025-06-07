@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Request Invite - Staycado</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase App (core) -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyBGqtE8-zYcs4nnE_CScSUrxc85JBkMarY",
+            authDomain: "staycado.firebaseapp.com",
+            projectId: "staycado",
+            storageBucket: "staycado.firebasestorage.app",
+            messagingSenderId: "369348767227",
+            appId: "1:369348767227:web:c39e0fe4e04a499af12f5e",
+            measurementId: "G-K6S1YJL8DD"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        
+        // Make auth available globally
+        window.auth = auth;
+        window.signInWithPopup = signInWithPopup;
+        window.GoogleAuthProvider = GoogleAuthProvider;
+        window.signOut = signOut;
+        window.onAuthStateChanged = onAuthStateChanged;
+        window.provider = provider;
+    </script>
     <style>
         * {
             margin: 0;
@@ -178,7 +207,10 @@
             <a href="request-invite.html" class="nav-link">Request Invite</a>
             <a href="about.html" class="nav-link">About</a>
         </nav>
-        <button class="nav-btn">Sign In</button>
+        <div class="auth-buttons">
+            <button class="nav-btn" id="authButton">Sign In</button>
+            <button class="nav-btn" id="signOutButton" style="display: none; margin-left: 0.5rem;">Sign Out</button>
+        </div>
     </header>
     
     <main class="main-content">
@@ -223,6 +255,63 @@
                 document.querySelector('.submit-btn').style.display = 'none';
                 thankYouMessage.style.display = 'block';
             }
+        });
+    </script>
+    
+    <script>
+        // Wait for Firebase to load
+        window.addEventListener('load', function() {
+            const authButton = document.getElementById('authButton');
+            const signOutButton = document.getElementById('signOutButton');
+            let currentUser = null;
+            
+            // Listen for authentication state changes
+            window.onAuthStateChanged(window.auth, (user) => {
+                currentUser = user;
+                if (user) {
+                    // User is signed in - show dashboard button and sign out option
+                    authButton.textContent = 'Dashboard';
+                    signOutButton.style.display = 'inline-block';
+                } else {
+                    // User is signed out
+                    authButton.textContent = 'Sign In';
+                    signOutButton.style.display = 'none';
+                }
+            });
+            
+            // Handle auth button click
+            authButton.addEventListener('click', async () => {
+                if (currentUser) {
+                    // Go to dashboard - pass user token for cross-domain auth
+                    currentUser.getIdToken().then((token) => {
+                        window.location.href = `https://my.staycado.com?token=${token}`;
+                    });
+                } else {
+                    // Sign in with Google
+                    try {
+                        const result = await window.signInWithPopup(window.auth, window.provider);
+                        const user = result.user;
+                        console.log('User signed in successfully:', user.email);
+                        // Get token and redirect to dashboard
+                        user.getIdToken().then((token) => {
+                            window.location.href = `https://my.staycado.com?token=${token}`;
+                        });
+                    } catch (error) {
+                        console.error('Error signing in:', error);
+                        alert('Error signing in. Please try again.');
+                    }
+                }
+            });
+            
+            // Handle sign out button click
+            signOutButton.addEventListener('click', async () => {
+                try {
+                    await window.signOut(window.auth);
+                    console.log('User signed out successfully');
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                }
+            });
         });
     </script>
 </body>
