@@ -403,9 +403,14 @@
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token') || sessionStorage.getItem('authToken');
             
+            console.log('Dashboard: Checking authentication...');
+            console.log('Dashboard: URL params token:', urlParams.get('token'));
+            console.log('Dashboard: Session storage token:', sessionStorage.getItem('authToken'));
+            console.log('Dashboard: Final token:', token);
+            
             if (token) {
                 // We have a token from the main site, user is authenticated
-                console.log('Token received from main site');
+                console.log('Dashboard: Token received from main site');
                 loading.classList.add('hidden');
                 dashboard.classList.remove('hidden');
                 
@@ -446,6 +451,7 @@
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else {
                 // No token, check Firebase auth normally
+                console.log('Dashboard: No token found, checking Firebase auth...');
                 let authCheckTimeout;
                 
                 window.onAuthStateChanged(window.auth, (user) => {
