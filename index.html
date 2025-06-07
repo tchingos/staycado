@@ -268,16 +268,20 @@
             // Handle auth button click
             authButton.addEventListener('click', async () => {
                 if (currentUser) {
-                    // Go to dashboard
-                    window.location.href = 'https://my.staycado.com';
+                    // Go to dashboard - give Firebase time to sync auth state across domains
+                    setTimeout(() => {
+                        window.location.href = 'https://my.staycado.com';
+                    }, 500);
                 } else {
                     // Sign in with Google
                     try {
                         const result = await window.signInWithPopup(window.auth, window.provider);
                         const user = result.user;
                         console.log('User signed in successfully:', user.email);
-                        // Redirect to dashboard after successful sign in
-                        window.location.href = 'https://my.staycado.com';
+                        // Redirect to dashboard after successful sign in - give time for auth to sync
+                        setTimeout(() => {
+                            window.location.href = 'https://my.staycado.com';
+                        }, 1000);
                     } catch (error) {
                         console.error('Error signing in:', error);
                         alert('Error signing in. Please try again.');
