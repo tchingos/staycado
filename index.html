@@ -621,33 +621,40 @@
                 }
             }
             
-            // Check for sign out parameter from dashboard
+            // Check for sign out parameter from dashboard FIRST
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('signout') === 'true') {
                 console.log('Sign out requested from dashboard');
-                // Handle sign out asynchronously
-                (async () => {
-                    try {
-                        if (window.auth.currentUser) {
-                            await window.signOut(window.auth);
-                            console.log('User signed out successfully');
-                        }
-                    } catch (error) {
+                // Handle sign out immediately and synchronously
+                if (window.auth.currentUser) {
+                    window.signOut(window.auth).then(() => {
+                        console.log('User signed out successfully');
+                        // Clean up URL after sign out
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        // Force navigation update to logged out state
+                        updateNavigation(null);
+                    }).catch((error) => {
                         console.error('Error signing out:', error);
-                    }
-                })();
-                // Clean up URL
-                window.history.replaceState({}, document.title, window.location.pathname);
+                        // Clean up URL even if sign out fails
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        updateNavigation(null);
+                    });
+                } else {
+                    // No user to sign out, just clean up URL
+                    console.log('No user to sign out');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                    updateNavigation(null);
+                }
+            } else {
+                // Initialize with logged out state
+                updateNavigation(null);
+                
+                // Listen for authentication state changes
+                window.onAuthStateChanged(window.auth, (user) => {
+                    currentUser = user;
+                    updateNavigation(user);
+                });
             }
-            
-            // Initialize with logged out state
-            updateNavigation(null);
-            
-            // Listen for authentication state changes
-            window.onAuthStateChanged(window.auth, (user) => {
-                currentUser = user;
-                updateNavigation(user);
-            });
             
             // Menu item click handlers
             signInMenuItem.addEventListener('click', async () => {
