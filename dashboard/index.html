@@ -247,12 +247,27 @@
                 loading.classList.add('hidden');
                 dashboard.classList.remove('hidden');
                 
-                // For now, show generic user info since we have a valid token
-                userEmail.textContent = 'Authenticated User';
-                welcomeEmail.textContent = 'Authenticated User';
-                
                 // Store token for navigation to other pages
                 sessionStorage.setItem('authToken', token);
+                
+                // Decode the Firebase token to get user info
+                try {
+                    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+                    const userEmailFromToken = tokenPayload.email;
+                    const userName = tokenPayload.name;
+                    
+                    if (userEmailFromToken) {
+                        userEmail.textContent = userEmailFromToken;
+                        welcomeEmail.textContent = userName || userEmailFromToken;
+                    } else {
+                        userEmail.textContent = 'Authenticated User';
+                        welcomeEmail.textContent = 'Authenticated User';
+                    }
+                } catch (error) {
+                    console.error('Error decoding token:', error);
+                    userEmail.textContent = 'Authenticated User';
+                    welcomeEmail.textContent = 'Authenticated User';
+                }
                 
                 // Clean up URL
                 window.history.replaceState({}, document.title, window.location.pathname);
