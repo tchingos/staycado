@@ -198,7 +198,7 @@
         <header class="header">
             <div class="logo">Staycado</div>
             <nav class="nav-links" style="display: flex; gap: 2rem; align-items: center;">
-                <a href="index.html" class="nav-link" style="color: #667eea; text-decoration: none; font-weight: 500;">Dashboard</a>
+                <a href="#" class="nav-link" style="color: #667eea; text-decoration: none; font-weight: 500;" onclick="return false;">Dashboard</a>
                 <a href="profile.html" class="nav-link" style="color: #333; text-decoration: none; font-weight: 500; transition: color 0.2s ease;" onmouseover="this.style.color='#667eea'" onmouseout="this.style.color='#333'">Profile</a>
             </nav>
             <div class="user-info">
@@ -237,9 +237,9 @@
             const welcomeEmail = document.getElementById('welcomeEmail');
             const signOutBtn = document.getElementById('signOutBtn');
             
-            // Check for auth token in URL
+            // Check for auth token in URL or session storage
             const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
+            const token = urlParams.get('token') || sessionStorage.getItem('authToken');
             
             if (token) {
                 // We have a token from the main site, user is authenticated
